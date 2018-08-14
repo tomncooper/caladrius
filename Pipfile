@@ -13,6 +13,8 @@ matplotlib = "*"
 fbprophet = "*"
 kazoo = "*"
 influxdb = "*"
+click = "*"
+humanfriendly = "*"
 
 [dev-packages]
 ipython = "*"

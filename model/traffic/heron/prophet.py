@@ -295,11 +295,10 @@ class ProphetTrafficModel(HeronTrafficModel):
                 cast(float, float(kwargs["metrics_sample_period"]))
         else:
             sample_period_err: str = \
-                ("Inferring metric sample period is not yet supported. Please "
-                 "supply the period which the metrics timeseries is reported "
-                 "in.")
-            LOG.error(sample_period_err)
-            raise NotImplementedError(sample_period_err)
+                ("Inferring metric sample period is not yet supported. Unless it is "
+                 "supplied a sample period of 60 seconds will be assumed")
+            time_period_sec = 60.0
+            LOG.warning(sample_period_err)
 
         output: Dict[str, Any] = {}
 
