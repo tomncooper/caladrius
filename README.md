@@ -74,15 +74,15 @@ configurations.
 
 ### Starting the API Server
 
-The Caladrius API server can be started by running the `app.py` script in the
+The Caladrius API server can be started by running the `server.py` script in the
 root directory. This can be run in the appropriate virtual environment using
 pipenv (make sure your `python` command points to Python 3):
 
-    $ pipenv run python app.py --config /path/to/config/file
+    $ pipenv run python server.py --config /path/to/config/file
 
 Additional command line arguments are available via:
 
-    $ pipenv run python app.py --help
+    $ pipenv run python server.py --help
 
 ## Documentation
 
