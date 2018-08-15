@@ -3,7 +3,7 @@
 # http://www.apache.org/licenses/LICENSE-2.0
 
 """ This module contains methods for validating the performance predictions of
-the Caladrius Heron queueing theory model."""
+the Caladrius Apache Heron topology performance queueing theory model."""
 
 import os
 import sys
@@ -304,8 +304,7 @@ if __name__ == "__main__":
             os.path.join(
                 ARGS.output_dir,
                 (
-                    f"{ARGS.topology}_{ARGS.cluster}_"
-                    f"{ARGS.environ}_arrival_rates.csv"
+                    f"{ARGS.topology}_{ARGS.cluster}_{ARGS.environ}_arrival_rates.csv"
                 ),
             )
         )

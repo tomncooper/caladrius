@@ -22,6 +22,50 @@ from caladrius.graph.utils.heron import graph_check
 LOG: logging.Logger = logging.getLogger(__name__)
 
 
+def _check_start_end(**kwargs) -> Tuple[dt.datetime, dt.datetime]:
+
+    if "start" in kwargs and "end" in kwargs:
+        start_ts: int = int(kwargs["start"])
+        start: dt.datetime = dt.datetime.utcfromtimestamp(start_ts)
+        end_ts: int = int(kwargs["end"])
+        end: dt.datetime = dt.datetime.utcfromtimestamp(end_ts)
+        LOG.info(
+            "Start and end time stamps supplied, using metric "
+            "gathering period from %s to %s",
+            start.isoformat(),
+            end.isoformat(),
+        )
+    elif "start" in kwargs and "end" not in kwargs:
+        end = dt.datetime.utcnow().replace(tzinfo=dt.timezone.utc)
+        start_ts = int(kwargs["start"])
+        start = dt.datetime.utcfromtimestamp(start_ts)
+        LOG.info(
+            "Only start time (%s) was supplied. Setting end time to " "UTC now: %s",
+            start.isoformat(),
+            end.isoformat(),
+        )
+    elif "source_hours" in kwargs:
+        end = dt.datetime.utcnow().replace(tzinfo=dt.timezone.utc)
+        start = end - dt.timedelta(hours=int(kwargs["source_hours"]))
+        LOG.info(
+            "Source hours provided, using metric gathering period " "from %s to %s",
+            start.isoformat(),
+            end.isoformat(),
+        )
+
+    else:
+        err_msg: str = (
+            "Neither 'start', 'end' or 'source_hours' "
+            "key word arguments were supplied. Either 'start',"
+            " 'start' and 'end' or 'source_hours' should be "
+            "provided"
+        )
+        LOG.error(err_msg)
+        raise RuntimeError(err_msg)
+
+    return start, end
+
+
 class QTTopologyModel(HeronTopologyModel):
     """ This model implementation predict topology performance using queueing
     theory.
@@ -60,6 +104,11 @@ class QTTopologyModel(HeronTopologyModel):
         topology_ref: str = None,
         **kwargs: Any
     ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        """ This method will predict the arrival rate, due to the supplied spout traffic,
+        at each of the instances in the specified topology. These Calculations will be
+        based on metrics recorded during the period specified by the start and end
+        timestamps.
+        """
 
         if not topology_ref:
             # Get the reference of the latest physical graph entry for this
@@ -122,64 +171,24 @@ class QTTopologyModel(HeronTopologyModel):
         """
 
         # TODO: check spout traffic keys are integers!
-
-        if "start" in kwargs and "end" in kwargs:
-            start_ts: int = int(kwargs["start"])
-            start: dt.datetime = dt.datetime.utcfromtimestamp(start_ts)
-            end_ts: int = int(kwargs["end"])
-            end: dt.datetime = dt.datetime.utcfromtimestamp(end_ts)
-            LOG.info(
-                "Start and end time stamps supplied, using metric "
-                "gathering period from %s to %s",
-                start.isoformat(),
-                end.isoformat(),
-            )
-        elif "start" in kwargs and "end" not in kwargs:
-            end = dt.datetime.utcnow().replace(tzinfo=dt.timezone.utc)
-            start_ts = int(kwargs["start"])
-            start = dt.datetime.utcfromtimestamp(start_ts)
-            LOG.info(
-                "Only start time (%s) was supplied. Setting end time to " "UTC now: %s",
-                start.isoformat(),
-                end.isoformat(),
-            )
-        elif "source_hours" in kwargs:
-            end = dt.datetime.utcnow().replace(tzinfo=dt.timezone.utc)
-            start = end - dt.timedelta(hours=int(kwargs["source_hours"]))
-            LOG.info(
-                "Source hours provided, using metric gathering period " "from %s to %s",
-                start.isoformat(),
-                end.isoformat(),
-            )
-
-        else:
-            err_msg: str = (
-                "Neither 'start', 'end' or 'source_hours' "
-                "key word arguments were supplied. Either 'start',"
-                " 'start' and 'end' or 'source_hours' should be "
-                "provided"
-            )
-            LOG.error(err_msg)
-            raise RuntimeError(err_msg)
+        start, end = _check_start_end(**kwargs)
 
         metric_bucket_length: int = cast(int, self.config["metric.bucket.length"])
 
         LOG.info(
-            "Predicting performance of currently running topology %s "
-            "using queueing theory model",
+            "Predicting performance of currently running topology %s using queueing "
+            "theory model",
             topology_id,
         )
 
         # Remove the start and end time kwargs so we don't supply them twice to
         # the metrics client.
-        # TODO: We need to make this cleaner? Add start and end to topo model?
-        other_kwargs: Dict[str, Any] = {
-            key: value for key, value in kwargs.items() if key not in ["start", "end"]
-        }
+        kwargs.pop("start")
+        kwargs.pop("end")
 
         # Get the service time for all elements
         service_times: pd.DataFrame = self.metrics_client.get_service_times(
-            topology_id, cluster, environ, start, end, **other_kwargs
+            topology_id, cluster, environ, start, end, **kwargs
         )
 
         # Calculate the service rate for each instance
@@ -223,12 +232,6 @@ class QTTopologyModel(HeronTopologyModel):
         combined: pd.DataFrame = service_time_summary.merge(
             in_ars, on=["task", "stream"]
         )
-
-        combined["capacity"] = (
-            combined["arrival_rate"] / combined["tuples_per_sec"]
-        ) * 100.0
-
-        combined["back_pressure"] = combined["capacity"] > 100.0
 
         return combined
 

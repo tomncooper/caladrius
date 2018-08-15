@@ -63,6 +63,8 @@ def get_topology_refs(graph_client: GremlinClient, topology_id: str) -> List[str
         A list of topology reference strings.
     """
 
+    LOG.info("Finding all references to topology: %s in the graph database", topology_id)
+
     refs: List[str] = (
         graph_client.graph_traversal.V()
         .has("topology_id", topology_id)
@@ -141,10 +143,10 @@ def _build_graph(
     cluster: str,
     environ: str,
     topology_id: str,
-    ref_prefix: str = "current",
+    ref_prefix: str = "heron",
 ) -> str:
 
-    topology_ref: str = create_graph_ref(ref_prefix, cluster, environ, topology_id)
+    topology_ref: str = create_graph_ref(cluster, environ, topology_id, ref_prefix)
 
     logical_plan: Dict[str, Any] = tracker.get_logical_plan(
         tracker_url, cluster, environ, topology_id
@@ -203,7 +205,7 @@ def graph_check(
         )
 
         topology_ref: str = _build_graph(
-            graph_client, tracker_url, cluster, environ, topology_id
+            graph_client, tracker_url, cluster, environ, topology_id,
         )
 
     elif not _physical_plan_still_current(

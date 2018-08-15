@@ -135,7 +135,13 @@ class HeronTraffic(Resource):
         for model_name in models:
             LOG.info("Running traffic performance model %s", model_name)
 
-            model: HeronTrafficModel = self.models[model_name]
+            try:
+                model: HeronTrafficModel = self.models[model_name]
+            except KeyError as key_err:
+                LOG.error("No such model: %s", model_name)
+                errors.append({"model": model_name, "type": str(type(key_err)),
+                               "error": f"No such model: {str(key_err)}"})
+                break
 
             try:
                 results: Dict[str, Any] = model.predict_traffic(
@@ -148,8 +154,8 @@ class HeronTraffic(Resource):
                           str(err))
                 errors.append({"model": model.name, "type": str(type(err)),
                                "error": str(err)})
-            else:
-                output[model_name] = results
+
+            output[model_name] = results
 
         if errors:
             return {"errors": errors}, 500

@@ -11,7 +11,7 @@ def setup(console: bool = True, logfile: str = None,
           debug: bool = False) -> None:
     """ This will set up the root Python logger instance and by default will
     attach a stream handler piping all output to stdout. However an optional
-    output filename can be specified to preserve the logs. The dubug argument
+    output filename can be specified to preserve the logs. The debug argument
     will set the log level to DEBUG and will included line numbers and function
     name information in the log output.
 
