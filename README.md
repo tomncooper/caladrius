@@ -1,22 +1,20 @@
-# Caladrius
+# Magpie
 
 Performance modelling for Distributed Stream Processing Systems (DSPS)
 such as [Apache Heron](https://apache.github.io/incubator-heron/) and [Apache
 Storm](http://storm.apache.org/).
 
-Full details can be found on the [documentation
-site](http://caladrius.readthedocs.io/).
-
-**NOTE**: Caladrius is a prototype project, which is the result of a 3 month
-internship with Twitter's Real Time Compute Team. It should be considered alpha
-level software. All contributions are welcome, please see the contributing page
-on the documentation website for more details.
+**NOTE**: Magpie is a prototype project, which is based on Caladrius, itself a 
+prototype project that was the result of a 3 month internship with Twitter's 
+Real Time Compute Team. It should be considered alpha level software. All 
+contributions are welcome, please see the contributing page on the documentation 
+website for more details.
 
 ## Setup
 
 ### Python
 
-Caladrius requires Python 3.6, additional Python dependencies are listed in
+Magpie requires Python 3.6, additional Python dependencies are listed in
 the Pipfile. Dependencies can be installed using
 [pipenv](https://docs.pipenv.org/) by running the following command in the
 caladrius root directory:
@@ -25,18 +23,18 @@ caladrius root directory:
 
 Add the `--dev` flag to the above command to install development dependencies.
 
-Caladrius should also be added to your `PYTHONPATH`. The best way to do this is
+Magpie should also be added to your `PYTHONPATH`. The best way to do this is
 by adding the folder above the Caladrius repo to the `PYTHONPATH` environment
 variable using a command like the one below:
 
-    $ export PYTHONPATH=$PYTHONPATH:<path/to/folder/above/caladrius>
+    $ export PYTHONPATH=$PYTHONPATH:<path/to/folder/above/magpie>
 
 This line should be added to your `.profile` (or similar) start up script to
 preserve this across reboots.
 
 ### Graph Database
 
-Caladrius requires a [Gremlin
+Magpie requires a [Gremlin
 Server](http://tinkerpop.apache.org/docs/current/reference/#gremlin-server)
 instance running [TinkerPop](http://tinkerpop.apache.org/) 3.3.2 or higher. 
 
@@ -59,7 +57,7 @@ in-memory TinkerPop Server instance. If graphs need to be persisted to disk
 then these settings can be altered in the appropriate configuration file in the
 `conf` directory of the Gremlin Server distribution.
     
-## Running Caladrius
+## Running Magpie
 
 ### Configuration
 
@@ -74,7 +72,7 @@ configurations.
 
 ### Starting the API Server
 
-The Caladrius API server can be started by running the `server.py` script in the
+The Magpie API server can be started by running the `server.py` script in the
 root directory. This can be run in the appropriate virtual environment using
 pipenv (make sure your `python` command points to Python 3):
 
@@ -87,7 +85,7 @@ Additional command line arguments are available via:
 ## Documentation
 
 Documentation for stable releases is hosted on
-[ReadTheDocs](http://caladrius.readthedocs.io/).
+[ReadTheDocs](http://magpie.readthedocs.io/).
 
 If you want to build the latest documentation then this can be done using
 [Sphinx](http://www.sphinx-doc.org/en/master/index.html). Assuming you have
@@ -100,9 +98,3 @@ following commands in the repository root:
 
 This will place the constructed html documentation in the `docs/build`
 directory.
-
-## Security
-
-If you spot any security or other sensitive issues with the software please
-report them via the [Twitter HackerOne](https://hackerone.com/twitter) bug
-bounty program.
