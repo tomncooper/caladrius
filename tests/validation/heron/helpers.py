@@ -14,19 +14,24 @@ from collections import defaultdict
 
 import pandas as pd
 
-from caladrius.common.heron import tracker
-from caladrius.metrics.heron.client import HeronMetricsClient
+from magpie.common.heron import tracker
+from magpie.metrics.heron.client import HeronMetricsClient
 
 LOG: logging.Logger = logging.getLogger(__name__)
 
 
-def get_spout_state(metrics_client: HeronMetricsClient, topology_id: str,
-                    cluster: str, environ: str, tracker_url: str,
-                    start: dt.datetime, end: dt.datetime,
-                    metrics_sample_period: float,
-                    summary_method: str = "median",
-                    **kwargs: Union[str, int, float]
-                    ) -> Dict[int, Dict[str, float]]:
+def get_spout_state(
+    metrics_client: HeronMetricsClient,
+    topology_id: str,
+    cluster: str,
+    environ: str,
+    tracker_url: str,
+    start: dt.datetime,
+    end: dt.datetime,
+    metrics_sample_period: float,
+    summary_method: str = "median",
+    **kwargs: Union[str, int, float],
+) -> Dict[int, Dict[str, float]]:
     """ Helper script that will fetch the median or mean spout emission rates
     and format them into the dictionary structure expected by the topology
     performance prediction methods.
@@ -56,19 +61,28 @@ def get_spout_state(metrics_client: HeronMetricsClient, topology_id: str,
         per second.
     """
 
-    LOG.info("Getting spout emission state dictionary for topology %s over a"
-             "period of %d seconds from %s to %s", topology_id,
-             (end-start).total_seconds(), start.isoformat(), end.isoformat())
+    LOG.info(
+        "Getting spout emission state dictionary for topology %s over a"
+        "period of %d seconds from %s to %s",
+        topology_id,
+        (end - start).total_seconds(),
+        start.isoformat(),
+        end.isoformat(),
+    )
 
     lplan: Dict[str, Any] = tracker.get_logical_plan(
-        tracker_url, cluster, environ, topology_id)
+        tracker_url, cluster, environ, topology_id
+    )
 
     emit_counts: pd.DataFrame = metrics_client.get_emit_counts(
-        topology_id, cluster, environ, start, end, **kwargs)
+        topology_id, cluster, environ, start, end, **kwargs
+    )
 
-    spout_groups: pd.core.groupby.DataFrameGroupBy = \
-        (emit_counts[emit_counts["component"].isin(lplan["spouts"])]
-         .groupby(["task", "stream"]))
+    spout_groups: pd.core.groupby.DataFrameGroupBy = (
+        emit_counts[emit_counts["component"].isin(lplan["spouts"])].groupby(
+            ["task", "stream"]
+        )
+    )
 
     if summary_method == "median":
 

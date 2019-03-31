@@ -1,10 +1,10 @@
-## CALADRIUS CONFIG ##
+## magpie CONFIG ##
 
-log.file.dir: "/tmp/caladrius/logs"
+log.file.dir: "/tmp/magpie/logs"
 
 ## GRAPH CONFIG ##
 
-graph.client: 'caladrius.graph.gremlin.client.GremlinClient'
+graph.client: 'magpie.graph.gremlin.client.GremlinClient'
 
 graph.client.config:
     gremlin.server.url : "localhost:8182"
@@ -12,7 +12,7 @@ graph.client.config:
 ## HERON CONFIG ##
 
 # The metrics client to use for Heron topologies
-heron.metrics.client: 'caladrius.metrics.heron.myclient.client.MyMetricsClient'
+heron.metrics.client: 'magpie.metrics.heron.myclient.client.MyMetricsClient'
 
 heron.metrics.client.config:
     myclient.database.url: "https://my-metrics-database.com"
@@ -22,7 +22,7 @@ heron.tracker.url: "http://heron-tracker.com"
 
 # Each of these models is run when the model/traffic/heron endpoint is called
 heron.traffic.models:
-    - "caladrius.model.traffic.heron.stats_summary.StatsSummaryTrafficModel"
+    - "magpie.model.traffic.heron.stats_summary.StatsSummaryTrafficModel"
 
 # This map is passed to all Traffic models at start up
 heron.traffic.models.config:
@@ -37,7 +37,7 @@ heron.traffic.models.config:
     zk.time.offset: -5
 
 heron.topology.models:
-    - "caladrius.model.topology.heron.queueing_theory.QTTopologyModel"
+    - "magpie.model.topology.heron.queueing_theory.QTTopologyModel"
 
 # This map is passed to all Topology models at start up
 heron.topology.models.config:

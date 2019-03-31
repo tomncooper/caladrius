@@ -4,6 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+pystan = "*"
 pandas = "*"
 requests = "*"
 flask-restful = "*"
@@ -23,3 +24,6 @@ sphinx = "*"
 mypy = "*"
 "flake8" = "*"
 black = "*"
+
+[pipenv]
+allow_prereleases = true

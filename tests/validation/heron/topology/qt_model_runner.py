@@ -3,7 +3,7 @@
 # http://www.apache.org/licenses/LICENSE-2.0
 
 """ This module contains methods for validating the performance predictions of
-the Caladrius Apache Heron topology performance queueing theory model."""
+the magpie Apache Heron topology performance queueing theory model."""
 
 import os
 import sys
@@ -17,13 +17,13 @@ from typing import List, Tuple, Dict, Any
 import requests
 import pandas as pd
 
-from caladrius import loader, logs
-from caladrius.graph.gremlin.client import GremlinClient
-from caladrius.metrics.heron.client import HeronMetricsClient
-from caladrius.model.topology.heron.queueing_theory import QTTopologyModel
-from caladrius.tests.validation.heron import helpers as heron_helper
-from caladrius.tests.validation import helpers as validation_helper
-from caladrius.common.heron import zookeeper
+from magpie import loader, logs
+from magpie.graph.gremlin.client import GremlinClient
+from magpie.metrics.heron.client import HeronMetricsClient
+from magpie.model.topology.heron.queueing_theory import QTTopologyModel
+from magpie.tests.validation.heron import helpers as heron_helper
+from magpie.tests.validation import helpers as validation_helper
+from magpie.common.heron import zookeeper
 
 LOG: logging.Logger = logging.getLogger(__name__)
 
@@ -203,7 +203,7 @@ def _create_parser() -> argparse.ArgumentParser:
     parser: argparse.ArgumentParser = argparse.ArgumentParser(
         description=(
             "This program validates the predictions of the "
-            "Caladrius queuing theory performance modelling system "
+            "magpie queuing theory performance modelling system "
             "for Heron Topologies"
         )
     )
@@ -258,7 +258,7 @@ if __name__ == "__main__":
         sys.exit(1)
     else:
         if not ARGS.quiet:
-            print("\nStarting Caladrius Heron Validation\n")
+            print("\nStarting Magpie Heron Validation\n")
             print(f"Loading configuration from file: {ARGS.config}")
 
     if not os.path.exists(CONFIG["log.file.dir"]):
@@ -303,9 +303,7 @@ if __name__ == "__main__":
         results.to_csv(
             os.path.join(
                 ARGS.output_dir,
-                (
-                    f"{ARGS.topology}_{ARGS.cluster}_{ARGS.environ}_arrival_rates.csv"
-                ),
+                (f"{ARGS.topology}_{ARGS.cluster}_{ARGS.environ}_arrival_rates.csv"),
             )
         )
 

@@ -2,7 +2,7 @@
 # Licensed under the Apache License, Version 2.0
 # http://www.apache.org/licenses/LICENSE-2.0
 
-""" This module contains the main program for Caladrius and will set up all
+""" This module contains the main program for magpie and will set up all
 resources and start the API server """
 
 import os
@@ -12,28 +12,43 @@ import argparse
 
 from typing import Dict, Any
 
-from caladrius import logs
-from caladrius import loader
-from caladrius.api.router import create_router
+from magpie import logs
+from magpie import loader
+from magpie.api.router import create_router
 
-LOG: logging.Logger = logging.getLogger("caladrius.main")
+LOG: logging.Logger = logging.getLogger("magpie.main")
 
 
 def _create_parser() -> argparse.ArgumentParser:
 
     parser: argparse.ArgumentParser = argparse.ArgumentParser(
-        description=("This is the command line interface for the Caladrius API"
-                     " server"))
+        description=("This is the command line interface for the magpie API" " server")
+    )
 
-    parser.add_argument("-c", "--config", required=True,
-                        help=("Path to the config file with data required by "
-                              "all configured models and classes"))
-    parser.add_argument("-q", "--quiet", required=False, action="store_true",
-                        help=("Optional flag indicating if console log output "
-                              "should be suppressed"))
-    parser.add_argument("--debug", required=False, action="store_true",
-                        help=("Optional flag indicating if debug level "
-                              "information should be displayed"))
+    parser.add_argument(
+        "-c",
+        "--config",
+        required=True,
+        help=(
+            "Path to the config file with data required by "
+            "all configured models and classes"
+        ),
+    )
+    parser.add_argument(
+        "-q",
+        "--quiet",
+        required=False,
+        action="store_true",
+        help=("Optional flag indicating if console log output " "should be suppressed"),
+    )
+    parser.add_argument(
+        "--debug",
+        required=False,
+        action="store_true",
+        help=(
+            "Optional flag indicating if debug level " "information should be displayed"
+        ),
+    )
 
     return parser
 
@@ -45,12 +60,11 @@ if __name__ == "__main__":
     try:
         CONFIG: Dict[str, Any] = loader.load_config(ARGS.config)
     except FileNotFoundError:
-        print(f"Config file: {ARGS.config} was not found. Aborting...",
-              file=sys.stderr)
+        print(f"Config file: {ARGS.config} was not found. Aborting...", file=sys.stderr)
         sys.exit(1)
     else:
         if not ARGS.quiet:
-            print("\nStarting Caladrius API...\n")
+            print("\nStarting Magpie API...\n")
             print(f"Loading configuration from file: {ARGS.config}")
 
     if not os.path.exists(CONFIG["log.file.dir"]):

@@ -8,18 +8,19 @@ import requests
 
 from humanfriendly.tables import format_smart_table
 
-LOG: logging.Logger = logging.getLogger("Caladrius_CLI.heron.topology")
+LOG: logging.Logger = logging.getLogger("Magpie_CLI.heron.topology")
+
 
 @click.group(short_help="Heron topology performance modelling options")
 @click.pass_obj
-def topology(caladrius):
+def topology(magpie):
     """ Provides access to the topology performance modelling options for Apache Heron."""
     pass
 
 
 @topology.command(short_help="List available topology performance models")
 @click.pass_obj
-def model_info(caladrius):
+def model_info(magpie):
     """ Returns the options available for modelling and predicting the performance of an
     Apache Heron topology."""
 
@@ -27,11 +28,13 @@ def model_info(caladrius):
 
     try:
         response: requests.Response = requests.get(
-            caladrius.url + "/model/topology/heron/model_info"
+            magpie.url + "/model/topology/heron/model_info"
         )
     except requests.exceptions.ConnectionError:
-        LOG.error("Unable to connect to Caladrius server at: %s, is the server active?",
-                  caladrius.url)
+        LOG.error(
+            "Unable to connect to Magpie server at: %s, is the server active?",
+            magpie.url,
+        )
 
     else:
         models: List[Dict[str, str]] = response.json()

@@ -13,10 +13,9 @@ from socket import error as socket_error
 from gremlin_python.structure.graph import Graph
 from gremlin_python.process.graph_traversal import has, GraphTraversalSource
 from gremlin_python.process.strategies import SubgraphStrategy
-from gremlin_python.driver.driver_remote_connection \
-        import DriverRemoteConnection
+from gremlin_python.driver.driver_remote_connection import DriverRemoteConnection
 
-from caladrius.config.keys import ConfKeys
+from magpie.config.keys import ConfKeys
 
 LOG: logging.Logger = logging.getLogger(__name__)
 
@@ -26,12 +25,10 @@ class GremlinClient(object):
 
     def __init__(self, config: dict, graph_name: str = "g") -> None:
         self.config: dict = config
-        self.gremlin_server_url: str = \
-            self.config[ConfKeys.GREMLIN_SERVER_URL.value]
+        self.gremlin_server_url: str = self.config[ConfKeys.GREMLIN_SERVER_URL.value]
 
         # Create remote graph traversal object
-        LOG.info("Connecting to graph database at: %s",
-                 self.gremlin_server_url)
+        LOG.info("Connecting to graph database at: %s", self.gremlin_server_url)
 
         self.graph_name: str = graph_name
         self.graph: Graph = Graph()
@@ -46,8 +43,9 @@ class GremlinClient(object):
         if not isinstance(other, GremlinClient):
             return False
 
-        if ((self.gremlin_server_url == other.gremlin_server_url) and
-                (self.graph_name == other.graph_name)):
+        if (self.gremlin_server_url == other.gremlin_server_url) and (
+            self.graph_name == other.graph_name
+        ):
             return True
 
         return False
@@ -63,18 +61,20 @@ class GremlinClient(object):
         connect_str: str = f"ws://{self.gremlin_server_url}/gremlin"
 
         try:
-            self.graph_traversal: GraphTraversalSource = \
-                self.graph.traversal().withRemote(
-                    DriverRemoteConnection(connect_str, self.graph_name))
+            self.graph_traversal: GraphTraversalSource = self.graph.traversal().withRemote(
+                DriverRemoteConnection(connect_str, self.graph_name)
+            )
         except socket_error as serr:
             if serr.errno != errno.ECONNREFUSED:
                 # Not the error we are looking for, re-raise
                 LOG.error("Socket error occurred")
                 raise serr
             # connection refused
-            msg: str = (f"Connection to gremlin sever at: "
-                        f"{self.gremlin_server_url} using connection string: "
-                        f"{connect_str} was refused. Is the server active?")
+            msg: str = (
+                f"Connection to gremlin sever at: "
+                f"{self.gremlin_server_url} using connection string: "
+                f"{connect_str} was refused. Is the server active?"
+            )
             LOG.error(msg)
             raise ConnectionRefusedError(msg)
 
@@ -91,15 +91,23 @@ class GremlinClient(object):
             reference are present (True) or not (False) in the graph database.
         """
 
-        num_vertices: int = len((self.graph_traversal.V()
-                                 .has("topology_id", topology_id)
-                                 .has("topology_ref", topology_ref)
-                                 .toList()))
+        num_vertices: int = len(
+            (
+                self.graph_traversal.V()
+                .has("topology_id", topology_id)
+                .has("topology_ref", topology_ref)
+                .toList()
+            )
+        )
 
         if num_vertices:
-            LOG.debug("%d vertices with the topology id: %s and reference: %s "
-                      "are present in the graph database.", num_vertices,
-                      topology_id, topology_ref)
+            LOG.debug(
+                "%d vertices with the topology id: %s and reference: %s "
+                "are present in the graph database.",
+                num_vertices,
+                topology_id,
+                topology_ref,
+            )
             return True
 
         return False
@@ -117,13 +125,16 @@ class GremlinClient(object):
                             reference are not present in the graph database.
         """
         if not self.topology_ref_exists(topology_id, topology_ref):
-            msg: str = (f"Topology: {topology_id} reference: {topology_ref} "
-                        f"is not present in the graph database")
+            msg: str = (
+                f"Topology: {topology_id} reference: {topology_ref} "
+                f"is not present in the graph database"
+            )
             LOG.error(msg)
             raise RuntimeError(msg)
 
-    def topology_subgraph(self, topology_id: str,
-                          topology_ref: str) -> GraphTraversalSource:
+    def topology_subgraph(
+        self, topology_id: str, topology_ref: str
+    ) -> GraphTraversalSource:
         """ Gets a gremlin graph traversal source limited to the sub-graph of
         vertices with the supplied topology ID and topology reference
         properties.
@@ -137,12 +148,18 @@ class GremlinClient(object):
             A GraphTraversalSource instance linked to the desired sub-graph
         """
 
-        LOG.debug("Creating traversal source for topology %s subgraph with "
-                  "reference: %s", topology_id, topology_ref)
+        LOG.debug(
+            "Creating traversal source for topology %s subgraph with " "reference: %s",
+            topology_id,
+            topology_ref,
+        )
 
-        topo_graph_traversal: GraphTraversalSource = \
-            self.graph_traversal.withStrategies(
-                SubgraphStrategy(vertices=has("topology_ref", topology_ref)
-                                 .has("topology_id", topology_id)))
+        topo_graph_traversal: GraphTraversalSource = self.graph_traversal.withStrategies(
+            SubgraphStrategy(
+                vertices=has("topology_ref", topology_ref).has(
+                    "topology_id", topology_id
+                )
+            )
+        )
 
         return topo_graph_traversal

@@ -31,13 +31,13 @@ from gremlin_python.process.traversal import P
 from gremlin_python.structure.graph import Vertex
 from gremlin_python import statics
 
-from caladrius.graph.gremlin.client import GremlinClient
-from caladrius.metrics.heron.client import HeronMetricsClient
-from caladrius.graph.analysis.heron.io_ratios import lstsq_io_ratios
+from magpie.graph.gremlin.client import GremlinClient
+from magpie.metrics.heron.client import HeronMetricsClient
+from magpie.graph.analysis.heron.io_ratios import lstsq_io_ratios
 
 # TODO: make this function configurable
-from caladrius.metrics.heron.topology.routing_probabilities import (
-    calc_current_inter_instance_rps as calculate_inter_instance_rps
+from magpie.metrics.heron.topology.routing_probabilities import (
+    calc_current_inter_instance_rps as calculate_inter_instance_rps,
 )
 
 # Type definitions

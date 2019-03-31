@@ -13,11 +13,11 @@ from typing import Dict, Any, cast, Tuple
 
 import pandas as pd
 
-from caladrius.model.topology.heron.base import HeronTopologyModel
-from caladrius.metrics.heron.client import HeronMetricsClient
-from caladrius.graph.gremlin.client import GremlinClient
-from caladrius.graph.analysis.heron import arrival_rates
-from caladrius.graph.utils.heron import graph_check
+from magpie.model.topology.heron.base import HeronTopologyModel
+from magpie.metrics.heron.client import HeronMetricsClient
+from magpie.graph.gremlin.client import GremlinClient
+from magpie.graph.analysis.heron import arrival_rates
+from magpie.graph.utils.heron import graph_check
 
 LOG: logging.Logger = logging.getLogger(__name__)
 

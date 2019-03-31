@@ -15,25 +15,27 @@ from typing import Dict
 import requests
 
 from kazoo.client import KazooClient
+from kazoo.exceptions import KazooException
 
 LOG: logging.Logger = logging.getLogger(__name__)
 
-TOPO_UPDATED_SEARCH_STR: str = \
-    (r"ctime</td><td>(?P<date>\w+.? \d+, \d+ \d+:\d+ \w.\w.) "
-     r"\(((?P<months>\d+)\s?months?,?)?\s?"
-     r"((?P<weeks>\d+)\s?weeks?,?)?\s?"
-     r"((?P<days>\d+)\s?days?,?)?\s?"
-     r"((?P<hours>\d+)\s?hours?,?)?\s?"
-     r"((?P<minutes>\d+\s?minutes?))?"
-     r"\sago\)")
+TOPO_UPDATED_SEARCH_STR: str = (
+    r"ctime</td><td>(?P<date>\w+.? \d+, \d+ \d+:\d+ \w.\w.) "
+    r"\(((?P<months>\d+)\s?months?,?)?\s?"
+    r"((?P<weeks>\d+)\s?weeks?,?)?\s?"
+    r"((?P<days>\d+)\s?days?,?)?\s?"
+    r"((?P<hours>\d+)\s?hours?,?)?\s?"
+    r"((?P<minutes>\d+\s?minutes?))?"
+    r"\sago\)"
+)
 
 DATE_FORMAT: str = "%B %d, %Y %I:%M %p"
 OLD_DATE_FORMAT: str = "%b %d, %Y %I:%M %p"
 
 
-def last_topo_update_ts_html(zk_connection: str, zk_root_node: str,
-                             topology_id: str, zk_time_offset: int = 0
-                             ) -> dt.datetime:
+def last_topo_update_ts_html(
+    zk_connection: str, zk_root_node: str, topology_id: str, zk_time_offset: int = 0
+) -> dt.datetime:
     """ This method will attempt to obtain a timestamp of the most recent
     physical plan uploaded to the zookeeper cluster. To do this it simply
     parses the HTML returned by a GET request to pplan node for the specified
@@ -60,11 +62,13 @@ def last_topo_update_ts_html(zk_connection: str, zk_root_node: str,
                         information.
     """
 
-    LOG.info("Querying Zookeeper server at %s for last update timestamp of "
-             "topology: %s", zk_connection, topology_id)
+    LOG.info(
+        "Querying Zookeeper server at %s for last update timestamp of " "topology: %s",
+        zk_connection,
+        topology_id,
+    )
 
-    zk_str: str = \
-        f"http://{zk_connection}/{zk_root_node}/pplans/{topology_id}/"
+    zk_str: str = f"http://{zk_connection}/{zk_root_node}/pplans/{topology_id}/"
 
     response: requests.Response = requests.get(zk_str)
 
@@ -73,8 +77,10 @@ def last_topo_update_ts_html(zk_connection: str, zk_root_node: str,
     result = re.search(TOPO_UPDATED_SEARCH_STR, response.text)
 
     if not result:
-        err_msg: str = (f"Could not obtain physical plan update timestamp "
-                        f"from zookeeper node at: {zk_str}")
+        err_msg: str = (
+            f"Could not obtain physical plan update timestamp "
+            f"from zookeeper node at: {zk_str}"
+        )
         LOG.error(err_msg)
         LOG.debug("Text returned from Zookeeper node page: %s", response.text)
         raise RuntimeError(err_msg)
@@ -95,9 +101,9 @@ def last_topo_update_ts_html(zk_connection: str, zk_root_node: str,
     return last_updated_tz
 
 
-def last_topo_update_ts(zk_connection: str, zk_root_node: str,
-                        topology_id: str, zk_time_offset: int = 0
-                        ) -> dt.datetime:
+def last_topo_update_ts(
+    zk_connection: str, zk_root_node: str, topology_id: str, zk_time_offset: int = 0
+) -> dt.datetime:
     """ This method will attempt to obtain a datetime object for the ctime
     (creation time) timestamp of the most recent physical plan uploaded to the
     zookeeper cluster.
@@ -123,31 +129,36 @@ def last_topo_update_ts(zk_connection: str, zk_root_node: str,
                         specified topology.
     """
 
-    LOG.info("Querying Zookeeper server at %s for last update timestamp of "
-             "topology: %s", zk_connection, topology_id)
+    LOG.info(
+        "Querying Zookeeper server at %s for last update timestamp of " "topology: %s",
+        zk_connection,
+        topology_id,
+    )
 
     # TODO: Look at authentication issues.
     zookeeper: KazooClient = KazooClient(hosts=zk_connection)
 
     try:
         zookeeper.start()
-    except kazoo.interfaces.timeout_exception as t_out:
+    except KazooException as k_err:
         LOG.error("Connection to zookeeper at: %s timed out", zk_connection)
-        raise t_out
+        raise k_err
 
     node_path: str = f"{zk_root_node}/pplans/{topology_id}"
 
     if not zookeeper.exists(node_path):
-        msg: str = (f"Node for topology: {topology_id} physical plan does not "
-                    f"exist in Zookeeper at "
-                    f"{zk_connection}{zk_root_node}/pplan")
+        msg: str = (
+            f"Node for topology: {topology_id} physical plan does not "
+            f"exist in Zookeeper at "
+            f"{zk_connection}{zk_root_node}/pplan"
+        )
         raise RuntimeError(msg)
 
     _, stats = zookeeper.get(node_path)
 
     zookeeper.stop()
 
-    last_updated: dt.datetime = dt.datetime.fromtimestamp(stats.ctime/1000)
+    last_updated: dt.datetime = dt.datetime.fromtimestamp(stats.ctime / 1000)
 
     zk_tz: dt.timezone = dt.timezone(dt.timedelta(hours=zk_time_offset))
 

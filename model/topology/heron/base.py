@@ -8,7 +8,7 @@ performance model classes"""
 from abc import abstractmethod
 from typing import Any, Dict
 
-from caladrius.model.base import Model
+from magpie.model.base import Model
 
 
 class HeronTopologyModel(Model):
@@ -16,10 +16,14 @@ class HeronTopologyModel(Model):
     classes """
 
     @abstractmethod
-    def predict_current_performance(self, topology_id: str, cluster: str,
-                                    environ: str,
-                                    spout_traffic: Dict[int, Dict[str, float]],
-                                    **kwargs: Any) -> Dict[str, Any]:
+    def predict_current_performance(
+        self,
+        topology_id: str,
+        cluster: str,
+        environ: str,
+        spout_traffic: Dict[int, Dict[str, float]],
+        **kwargs: Any
+    ) -> Dict[str, Any]:
         """ Predicts the performance of the specified topology as it is
         currently configured with the supplied traffic level.
 
@@ -41,9 +45,14 @@ class HeronTopologyModel(Model):
 
     @abstractmethod
     def predict_proposed_performance(
-            self, topology_id: str, cluster: str, environ: str,
-            spout_traffic: Dict[int, Dict[str, float]],
-            proposed_plan: Any, **kwargs: Any) -> Dict[str, Any]:
+        self,
+        topology_id: str,
+        cluster: str,
+        environ: str,
+        spout_traffic: Dict[int, Dict[str, float]],
+        proposed_plan: Any,
+        **kwargs: Any
+    ) -> Dict[str, Any]:
         """ Predicts the performance of the specified topology when configured
         according to the proposed physical plan.
 

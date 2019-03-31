@@ -1,4 +1,4 @@
-""" This module contains commands for querying the Caladrius traffic prediction end points
+""" This module contains commands for querying the Magpie traffic prediction end points
 for Apache Heron topologies. """
 
 import logging
@@ -11,19 +11,19 @@ import requests
 
 from humanfriendly.tables import format_smart_table
 
-LOG: logging.Logger = logging.getLogger("Caladrius_CLI.heron.traffic")
+LOG: logging.Logger = logging.getLogger("Magpie_CLI.heron.traffic")
 
 
 @click.group(short_help="Heron topology traffic modelling options")
 @click.pass_obj
-def traffic(caladrius):
+def traffic(magpie):
     """ Provides access to the traffic modelling options for Apache Heron."""
     pass
 
 
 @traffic.command(short_help="List available traffic models")
 @click.pass_obj
-def model_info(caladrius):
+def model_info(magpie):
     """ Returns the options available for modelling and predicting traffic into an Apache
     Heron topology."""
 
@@ -31,12 +31,12 @@ def model_info(caladrius):
 
     try:
         response: requests.Response = requests.get(
-            caladrius.url + "/model/traffic/heron/model_info"
+            magpie.url + "/model/traffic/heron/model_info"
         )
     except requests.exceptions.ConnectionError:
         LOG.error(
-            "Unable to connect to Caladrius server at: %s, is the server active?",
-            caladrius.url,
+            "Unable to connect to Magpie server at: %s, is the server active?",
+            magpie.url,
         )
     else:
         models: List[Dict[str, str]] = response.json()
@@ -72,8 +72,8 @@ def model_info(caladrius):
     help="The number of minutes of future traffic to predict",
 )
 @click.pass_obj
-def prediction(caladrius, topology, cluster, environ, model, source_hours, future_mins):
-    """ Issues a request to the Caladrius traffic prediction end point for Apache Heron
+def prediction(magpie, topology, cluster, environ, model, source_hours, future_mins):
+    """ Issues a request to the Magpie traffic prediction end point for Apache Heron
     topologies."""
 
     LOG.debug(
@@ -83,7 +83,7 @@ def prediction(caladrius, topology, cluster, environ, model, source_hours, futur
     )
 
     response: requests.Response = requests.get(
-        caladrius.url + "/model/traffic/heron",
+        magpie.url + "/model/traffic/heron",
         params={
             "topology_id": topology,
             "cluster": cluster,
@@ -98,7 +98,7 @@ def prediction(caladrius, topology, cluster, environ, model, source_hours, futur
 
     if "errors" in results:
         LOG.error("Traffic prediction failed")
-        click.echo("The following errors were reported by the Caladrius server:")
+        click.echo("The following errors were reported by the Magpie server:")
         for error in results["errors"]:
             if "model" in error:
                 click.echo(f"Model: {error['model']}")

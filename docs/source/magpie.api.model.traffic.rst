@@ -1,13 +1,13 @@
-caladrius.graph.gremlin package
-===============================
+magpie.api.model.traffic package
+================================
 
 Submodules
 ----------
 
-caladrius.graph.gremlin.client module
+magpie.api.model.traffic.heron module
 -------------------------------------
 
-.. automodule:: caladrius.graph.gremlin.client
+.. automodule:: magpie.api.model.traffic.heron
     :members:
     :undoc-members:
     :show-inheritance:
@@ -16,7 +16,7 @@ caladrius.graph.gremlin.client module
 Module contents
 ---------------
 
-.. automodule:: caladrius.graph.gremlin
+.. automodule:: magpie.api.model.traffic
     :members:
     :undoc-members:
     :show-inheritance:

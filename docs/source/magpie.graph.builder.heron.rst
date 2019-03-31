@@ -1,13 +1,13 @@
-caladrius.api.model.topology package
-====================================
+magpie.graph.builder.heron package
+==================================
 
 Submodules
 ----------
 
-caladrius.api.model.topology.heron module
+magpie.graph.builder.heron.builder module
 -----------------------------------------
 
-.. automodule:: caladrius.api.model.topology.heron
+.. automodule:: magpie.graph.builder.heron.builder
     :members:
     :undoc-members:
     :show-inheritance:
@@ -16,7 +16,7 @@ caladrius.api.model.topology.heron module
 Module contents
 ---------------
 
-.. automodule:: caladrius.api.model.topology
+.. automodule:: magpie.graph.builder.heron
     :members:
     :undoc-members:
     :show-inheritance:

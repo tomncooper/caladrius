@@ -11,7 +11,7 @@ import warnings
 
 import datetime as dt
 
-from typing import Union, List, DefaultDict, Dict, Optional, Any
+from typing import Union, List, DefaultDict, Dict, Optional, Any, Pattern
 from functools import lru_cache
 from collections import defaultdict
 
@@ -20,15 +20,15 @@ import pandas as pd
 from influxdb import InfluxDBClient
 from influxdb.resultset import ResultSet
 
-from caladrius.common.heron import tracker
-from caladrius.metrics.heron.client import HeronMetricsClient
+from magpie.common.heron import tracker
+from magpie.metrics.heron.client import HeronMetricsClient
 
 LOG: logging.Logger = logging.getLogger(__name__)
 
 INFLUX_TIME_FORMAT: str = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 INSTANCE_NAME_RE_STR: str = r"container_(?P<container>\d+)_.*_(?P<task>\d+)"
-INSTANCE_NAME_RE: re.Pattern = re.compile(INSTANCE_NAME_RE_STR)
+INSTANCE_NAME_RE: Pattern = re.compile(INSTANCE_NAME_RE_STR)
 
 
 @lru_cache(maxsize=128, typed=False)
@@ -771,7 +771,7 @@ class HeronInfluxDBClient(HeronMetricsClient):
         """ Gets a time series of the receive counts of each of the bolt
         instances in the specified topology"""
         msg: str = (
-            "The custom Caladrius receive-count metrics is not yet "
+            "The custom magpie receive-count metrics is not yet "
             "available via the Influx metrics database"
         )
         LOG.error(msg)

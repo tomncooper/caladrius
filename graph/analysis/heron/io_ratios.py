@@ -14,14 +14,13 @@ from typing import Dict, Union, List, Tuple
 import pandas as pd
 import numpy as np
 
-from caladrius.metrics.heron.client import HeronMetricsClient
-from caladrius.graph.gremlin.client import GremlinClient
+from magpie.metrics.heron.client import HeronMetricsClient
+from magpie.graph.gremlin.client import GremlinClient
 
 LOG: logging.Logger = logging.getLogger(__name__)
 
 
-def get_in_out_components(graph_client: GremlinClient,
-                          topology_id: str) -> List[str]:
+def get_in_out_components(graph_client: GremlinClient, topology_id: str) -> List[str]:
     """ Gets a list of components that have both incoming and outgoing streams.
 
     Arguments:
@@ -33,22 +32,33 @@ def get_in_out_components(graph_client: GremlinClient,
         A list of component name strings.
     """
 
-    in_out_comps: List[str] = (graph_client.graph_traversal.V()
-                               .hasLabel("bolt").has("topology_id",
-                                                     topology_id)
-                               .inE("logically_connected")
-                               .inV().as_("in_out")
-                               .outE("logically_connected")
-                               .select("in_out").by("component")
-                               .dedup().toList())
+    in_out_comps: List[str] = (
+        graph_client.graph_traversal.V()
+        .hasLabel("bolt")
+        .has("topology_id", topology_id)
+        .inE("logically_connected")
+        .inV()
+        .as_("in_out")
+        .outE("logically_connected")
+        .select("in_out")
+        .by("component")
+        .dedup()
+        .toList()
+    )
     return in_out_comps
 
 
-def lstsq_io_ratios(metrics_client: HeronMetricsClient,
-                    graph_client: GremlinClient, topology_id: str,
-                    cluster: str, environ: str,
-                    start: dt.datetime, end: dt.datetime, bucket_length: int,
-                    **kwargs: Union[str, int, float]) -> pd.DataFrame:
+def lstsq_io_ratios(
+    metrics_client: HeronMetricsClient,
+    graph_client: GremlinClient,
+    topology_id: str,
+    cluster: str,
+    environ: str,
+    start: dt.datetime,
+    end: dt.datetime,
+    bucket_length: int,
+    **kwargs: Union[str, int, float],
+) -> pd.DataFrame:
     """ This method will calculate the input/output ratio for each instance in
     the supplied topology using data aggregated from the defined period. The
     method uses least squares regression to calculate a coefficient for each
@@ -89,48 +99,67 @@ def lstsq_io_ratios(metrics_client: HeronMetricsClient,
           output stream, inputs stream source component combination.
     """
 
-    LOG.info("Calculating instance input/output ratios using least squares "
-             "regression for topology %s over a %d second window between %s "
-             "and %s", topology_id, (end-start).total_seconds(),
-             start.isoformat(), end.isoformat())
+    LOG.info(
+        "Calculating instance input/output ratios using least squares "
+        "regression for topology %s over a %d second window between %s "
+        "and %s",
+        topology_id,
+        (end - start).total_seconds(),
+        start.isoformat(),
+        end.isoformat(),
+    )
 
     emit_counts: pd.DataFrame = metrics_client.get_emit_counts(
-        topology_id, cluster, environ, start, end, **kwargs)
+        topology_id, cluster, environ, start, end, **kwargs
+    )
 
     execute_counts: pd.DataFrame = metrics_client.get_execute_counts(
-        topology_id, cluster, environ, start, end, **kwargs)
+        topology_id, cluster, environ, start, end, **kwargs
+    )
 
     # Limit the count DataFrames to only those component with both incoming and
     # outgoing streams
     in_out_comps: List[str] = get_in_out_components(graph_client, topology_id)
 
     emit_counts = emit_counts[emit_counts["component"].isin(in_out_comps)]
-    emit_counts.rename(index=str, columns={"stream": "outgoing_stream"},
-                       inplace=True)
+    emit_counts.rename(index=str, columns={"stream": "outgoing_stream"}, inplace=True)
 
-    execute_counts = execute_counts[execute_counts["component"]
-                                    .isin(in_out_comps)]
-    execute_counts.rename(index=str, columns={"stream": "incoming_stream"},
-                          inplace=True)
+    execute_counts = execute_counts[execute_counts["component"].isin(in_out_comps)]
+    execute_counts.rename(
+        index=str, columns={"stream": "incoming_stream"}, inplace=True
+    )
 
     # Re-sample the counts into equal length time buckets and group by task id,
     # time bucket and stream. This aligns the two DataFrames with timestamps of
     # equal length and start point so they can be merged later
-    emit_counts_ts: pd.DataFrame = \
-        (emit_counts.set_index(["task", "timestamp"])
-         .groupby([pd.Grouper(level="task"),
-                   pd.Grouper(freq=f"{bucket_length}S", level='timestamp'),
-                   "component", "outgoing_stream"])
-         ["emit_count"]
-         .sum().reset_index())
+    emit_counts_ts: pd.DataFrame = (
+        emit_counts.set_index(["task", "timestamp"])
+        .groupby(
+            [
+                pd.Grouper(level="task"),
+                pd.Grouper(freq=f"{bucket_length}S", level="timestamp"),
+                "component",
+                "outgoing_stream",
+            ]
+        )["emit_count"]
+        .sum()
+        .reset_index()
+    )
 
-    execute_counts_ts: pd.DataFrame = \
-        (execute_counts.set_index(["task", "timestamp"])
-         .groupby([pd.Grouper(level="task"),
-                   pd.Grouper(freq=f"{bucket_length}S", level='timestamp'),
-                   "component", "incoming_stream", "source_component"])
-         ["execute_count"]
-         .sum().reset_index())
+    execute_counts_ts: pd.DataFrame = (
+        execute_counts.set_index(["task", "timestamp"])
+        .groupby(
+            [
+                pd.Grouper(level="task"),
+                pd.Grouper(freq=f"{bucket_length}S", level="timestamp"),
+                "component",
+                "incoming_stream",
+                "source_component",
+            ]
+        )["execute_count"]
+        .sum()
+        .reset_index()
+    )
 
     rows: List[Dict[str, Union[str, float]]] = []
 
@@ -140,27 +169,27 @@ def lstsq_io_ratios(metrics_client: HeronMetricsClient,
     component: str
     in_data: pd.DataFrame
     for component, in_data in execute_counts_ts.groupby(["component"]):
-        in_stream_counts: pd.DataFrame = \
-            (in_data.set_index(["task", "timestamp", "incoming_stream",
-                                "source_component"])
-             .execute_count.unstack(level=["incoming_stream",
-                                           "source_component"])
-             .reset_index())
+        in_stream_counts: pd.DataFrame = (
+            in_data.set_index(
+                ["task", "timestamp", "incoming_stream", "source_component"]
+            )
+            .execute_count.unstack(level=["incoming_stream", "source_component"])
+            .reset_index()
+        )
 
-        out_stream_counts: pd.DataFrame = \
-            emit_counts_ts[emit_counts_ts.component == component]
+        out_stream_counts: pd.DataFrame = emit_counts_ts[
+            emit_counts_ts.component == component
+        ]
 
-        merged: pd.DataFrame = out_stream_counts.merge(in_stream_counts,
-                                                       on=["task",
-                                                           "timestamp"])
+        merged: pd.DataFrame = out_stream_counts.merge(
+            in_stream_counts, on=["task", "timestamp"]
+        )
         task: int
         out_stream: str
         data: pd.DataFrame
-        for (task, out_stream), data in merged.groupby(["task",
-                                                        "outgoing_stream"]):
+        for (task, out_stream), data in merged.groupby(["task", "outgoing_stream"]):
 
-            LOG.debug("Processing instance %d output stream %s", task,
-                      out_stream)
+            LOG.debug("Processing instance %d output stream %s", task, out_stream)
 
             # Get a series of the output counts for this output stream, these
             # are the dependent variables (b) of the least squares regression
@@ -171,8 +200,12 @@ def lstsq_io_ratios(metrics_client: HeronMetricsClient,
             # nothing else subscribes too then the emit count will be zero and
             # we can skip this output stream
             if output_counts.sum() <= 0.0:
-                LOG.debug("No emissions from instance %d on stream %s, "
-                          "skipping this stream...", task, out_stream)
+                LOG.debug(
+                    "No emissions from instance %d on stream %s, "
+                    "skipping this stream...",
+                    task,
+                    out_stream,
+                )
                 continue
 
             # Get just the input stream counts for each time bucket. This is
@@ -182,8 +215,7 @@ def lstsq_io_ratios(metrics_client: HeronMetricsClient,
             input_counts: pd.DataFrame = data[cols]
 
             coeffs: List[float]
-            coeffs, _, _, _ = np.linalg.lstsq(input_counts, output_counts,
-                                              rcond=None)
+            coeffs, _, _, _ = np.linalg.lstsq(input_counts, output_counts, rcond=None)
             i: int
             in_stream: str
             source: str
@@ -194,7 +226,8 @@ def lstsq_io_ratios(metrics_client: HeronMetricsClient,
                     "output_stream": out_stream,
                     "input_stream": in_stream,
                     "source_component": source,
-                    "coefficient": coeffs[i]}
+                    "coefficient": coeffs[i],
+                }
                 rows.append(row)
 
     return pd.DataFrame(rows)

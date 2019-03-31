@@ -3,7 +3,7 @@
 # http://www.apache.org/licenses/LICENSE-2.0
 
 """ This module contains classes and methods for constructing graph
-representations of Heron logical and physical plans within the Caladrius Graph
+representations of Heron logical and physical plans within the magpie Graph
 Database."""
 
 import logging
@@ -22,13 +22,13 @@ from gremlin_python.process.graph_traversal import (
 )
 from gremlin_python.structure.graph import Vertex, Edge
 
-from caladrius.common.heron import tracker
-from caladrius.graph.gremlin.client import GremlinClient
-from caladrius.graph.analysis.heron.routing_probabilities import (
+from magpie.common.heron import tracker
+from magpie.graph.gremlin.client import GremlinClient
+from magpie.graph.analysis.heron.routing_probabilities import (
     set_shuffle_routing_probs,
     set_fields_routing_probs,
 )
-from caladrius.metrics.heron.client import HeronMetricsClient
+from magpie.metrics.heron.client import HeronMetricsClient
 
 LOG: logging.Logger = logging.getLogger(__name__)
 
@@ -369,7 +369,7 @@ def create_physical_graph(
     physical_plan: Dict[str, Any],
 ) -> None:
     """ This method will build the physical graph of the specified topology
-    in the caladrius graph database. It will attach the supplied reference
+    in the magpie graph database. It will attach the supplied reference
     to all vertices of this topology physical graph.
 
     Arguments:

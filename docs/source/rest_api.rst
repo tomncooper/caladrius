@@ -1,7 +1,7 @@
 REST API
 ========
 
-Caladrius exposes several REST endpoints over which to request performance
+Magpie exposes several REST endpoints over which to request performance
 modelling. 
 
 Model
@@ -17,7 +17,7 @@ Traffic
 Returns:
     A JSON list of objects each with a :code:`name` and :code:`decription`
     attribute for the configured traffic models. The names are unique across
-    Caladrius and can be used in the :code:`model` fields of other requests.
+    Magpie and can be used in the :code:`model` fields of other requests.
 
 :code:`GET /model/traffic/{dsps-name}`
 
@@ -49,7 +49,7 @@ Topology
 Returns:
     A JSON list of objects each with a :code:`name` and :code:`decription`
     attribute for the configured topology performance models. The names are
-    unique across Caladrius and can be used in the :code:`model` fields of
+    unique across Magpie and can be used in the :code:`model` fields of
     other requests.
 
 :code:`POST /model/topology/{dsps-name}/current`

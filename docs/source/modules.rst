@@ -1,7 +1,7 @@
-caladrius
-=========
+magpie
+======
 
 .. toctree::
    :maxdepth: 4
 
-   caladrius
+   magpie

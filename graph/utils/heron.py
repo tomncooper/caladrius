@@ -11,10 +11,10 @@ import datetime as dt
 
 from typing import List, Dict, Any, Optional, Tuple
 
-from caladrius.graph.gremlin.client import GremlinClient
-from caladrius.graph.builder.heron import builder
-from caladrius.common.heron import tracker
-from caladrius.common.heron import zookeeper
+from magpie.graph.gremlin.client import GremlinClient
+from magpie.graph.builder.heron import builder
+from magpie.common.heron import tracker
+from magpie.common.heron import zookeeper
 
 LOG: logging.Logger = logging.getLogger(__name__)
 
@@ -63,7 +63,9 @@ def get_topology_refs(graph_client: GremlinClient, topology_id: str) -> List[str
         A list of topology reference strings.
     """
 
-    LOG.info("Finding all references to topology: %s in the graph database", topology_id)
+    LOG.info(
+        "Finding all references to topology: %s in the graph database", topology_id
+    )
 
     refs: List[str] = (
         graph_client.graph_traversal.V()
@@ -205,7 +207,7 @@ def graph_check(
         )
 
         topology_ref: str = _build_graph(
-            graph_client, tracker_url, cluster, environ, topology_id,
+            graph_client, tracker_url, cluster, environ, topology_id
         )
 
     elif not _physical_plan_still_current(

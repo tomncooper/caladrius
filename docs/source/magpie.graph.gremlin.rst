@@ -1,13 +1,13 @@
-caladrius.graph.utils package
-=============================
+magpie.graph.gremlin package
+============================
 
 Submodules
 ----------
 
-caladrius.graph.utils.heron module
+magpie.graph.gremlin.client module
 ----------------------------------
 
-.. automodule:: caladrius.graph.utils.heron
+.. automodule:: magpie.graph.gremlin.client
     :members:
     :undoc-members:
     :show-inheritance:
@@ -16,7 +16,7 @@ caladrius.graph.utils.heron module
 Module contents
 ---------------
 
-.. automodule:: caladrius.graph.utils
+.. automodule:: magpie.graph.gremlin
     :members:
     :undoc-members:
     :show-inheritance:

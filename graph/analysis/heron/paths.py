@@ -12,7 +12,7 @@ from functools import lru_cache
 from gremlin_python.structure.graph import Vertex, Edge
 from gremlin_python.process.graph_traversal import GraphTraversalSource, out, has, in_
 
-from caladrius.graph.gremlin.client import GremlinClient
+from magpie.graph.gremlin.client import GremlinClient
 
 LOG: logging.Logger = logging.getLogger(__name__)
 
